@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字幕生成工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧设置面板 -->
+        <div class="settings-panel">
+            <h2>字幕设置</h2>
+            
+            <!-- 字幕高度设置 -->
+            <div class="setting-group">
+                <label for="subtitle-height">字幕高度</label>
+                <div class="input-group">
+                    <input type="number" id="subtitle-height" value="60" min="20" max="200">
+                    <span class="unit">px</span>
+                </div>
+            </div>
+
+            <!-- 字体大小设置 -->
+            <div class="setting-group">
+                <label for="font-size">字体大小</label>
+                <div class="input-group">
+                    <input type="number" id="font-size" value="40" min="12" max="100">
+                    <span class="unit">px</span>
+                </div>
+            </div>
+
+            <!-- 字体颜色设置 -->
+            <div class="setting-group">
+                <label for="font-color">字体颜色</label>
+                <div class="color-input-group">
+                    <div class="color-preview" id="font-color-preview" style="background-color: #030303;"></div>
+                    <input type="color" id="font-color" value="#030303">
+                    <input type="text" id="font-color-text" value="#030303" maxlength="7">
+                </div>
+            </div>
+
+            <!-- 轮廓颜色设置 -->
+            <div class="setting-group">
+                <label for="outline-color">轮廓颜色</label>
+                <div class="color-input-group">
+                    <div class="color-preview" id="outline-color-preview" style="background-color: #000000;"></div>
+                    <input type="color" id="outline-color" value="#000000">
+                    <input type="text" id="outline-color-text" value="#000000" maxlength="7">
+                </div>
+            </div>
+
+            <!-- 字体样式设置 -->
+            <div class="setting-group">
+                <label for="font-family">字体样式</label>
+                <select id="font-family">
+                    <option value="衣冠体" selected>衣冠体</option>
+                    <option value="Microsoft YaHei">微软雅黑</option>
+                    <option value="SimSun">宋体</option>
+                    <option value="SimHei">黑体</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Source Han Sans">思源黑体</option>
+                </select>
+            </div>
+
+            <!-- 字体粗细设置 -->
+            <div class="setting-group">
+                <label for="font-weight">字体粗细</label>
+                <select id="font-weight">
+                    <option value="300">细体</option>
+                    <option value="400" selected>正常</option>
+                    <option value="700">粗体</option>
+                    <option value="900">超粗体</option>
+                </select>
+            </div>
+
+            <!-- 字幕内容编辑 -->
+            <div class="setting-group">
+                <label for="subtitle-content">字幕内容</label>
+                <textarea id="subtitle-content" placeholder="你在直播间看黄权&#10;他什么都没得看&#10;我们都有光明的前途&#10;我们都在风尘里和社群"></textarea>
+                <div class="char-count">
+                    <span id="char-count">0</span>/1000
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="button-group">
+                <button id="generate-btn" class="btn btn-primary">生成字幕图片</button>
+                <button id="save-btn" class="btn btn-secondary">保存图片</button>
+            </div>
+        </div>
+
+        <!-- 右侧预览区域 -->
+        <div class="preview-panel">
+            <div class="preview-container">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>拖拽图片到此处或点击选择文件</p>
+                        <p class="upload-hint">支持 JPG、PNG、GIF、WebP 格式，最大 10MB</p>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="preview-area" id="preview-area" style="display: none;">
+                    <canvas id="preview-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>正在生成字幕图片...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
