@@ -34,7 +34,6 @@
             <div class="setting-group">
                 <label for="font-color">字体颜色</label>
                 <div class="color-input-group">
-                    <div class="color-preview" id="font-color-preview" style="background-color: #030303;"></div>
                     <input type="color" id="font-color" value="#030303">
                     <input type="text" id="font-color-text" value="#030303" maxlength="7">
                 </div>
@@ -44,9 +43,8 @@
             <div class="setting-group">
                 <label for="outline-color">轮廓颜色</label>
                 <div class="color-input-group">
-                    <div class="color-preview" id="outline-color-preview" style="background-color: #000000;"></div>
-                    <input type="color" id="outline-color" value="#000000">
-                    <input type="text" id="outline-color-text" value="#000000" maxlength="7">
+                    <input type="color" id="outline-color" value="#ffffff">
+                    <input type="text" id="outline-color-text" value="#ffffff" maxlength="7">
                 </div>
             </div>
 
@@ -75,10 +73,10 @@
                 </select>
             </div>
 
-            <!-- 字幕内容编辑 -->
+            <!-- 字幕内容 -->
             <div class="setting-group">
-                <label for="subtitle-content">字幕内容</label>
-                <textarea id="subtitle-content" placeholder="你在直播间看黄权&#10;他什么都没得看&#10;我们都有光明的前途&#10;我们都在风尘里和社群"></textarea>
+                <label for="subtitle-text">字幕内容</label>
+                <textarea id="subtitle-text" placeholder="请输入字幕内容..." maxlength="1000"></textarea>
                 <div class="char-count">
                     <span id="char-count">0</span>/1000
                 </div>
@@ -96,24 +94,19 @@
             <div class="preview-container">
                 <div class="upload-area" id="upload-area">
                     <div class="upload-content">
-                        <div class="upload-icon">📁</div>
-                        <p>拖拽图片到此处或点击选择文件</p>
+                        <svg class="upload-icon" viewBox="0 0 24 24" width="48" height="48">
+                            <path fill="#999" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <p>点击或拖拽上传背景图片</p>
                         <p class="upload-hint">支持 JPG、PNG、GIF、WebP 格式，最大 10MB</p>
-                        <input type="file" id="file-input" accept="image/*" style="display: none;">
                     </div>
+                    <input type="file" id="image-input" accept="image/*" hidden>
                 </div>
                 
-                <div class="preview-area" id="preview-area" style="display: none;">
-                    <canvas id="preview-canvas"></canvas>
-                </div>
+                <canvas id="preview-canvas" style="display: none;"></canvas>
+                <canvas id="export-canvas" style="display: none;"></canvas>
             </div>
         </div>
-    </div>
-
-    <!-- 加载提示 -->
-    <div class="loading-overlay" id="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
-        <p>正在生成字幕图片...</p>
     </div>
 
     <script src="script.js"></script>

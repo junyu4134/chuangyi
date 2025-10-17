@@ -1,181 +1,167 @@
 class SubtitleGenerator {
     constructor() {
-        this.canvas = document.getElementById('preview-canvas');
-        this.ctx = this.canvas.getContext('2d');
         this.backgroundImage = null;
-        this.backgroundCanvas = null; // 缓存背景画布
-        this.renderTimeout = null; // 防抖定时器
         this.settings = {
             subtitleHeight: 60,
             fontSize: 40,
             fontColor: '#030303',
-            outlineColor: '#000000',
+            outlineColor: '#ffffff',  // 默认轮廓颜色改为白色
             fontFamily: '衣冠体',
             fontWeight: '400',
-            content: ''
+            text: ''  // 默认字幕内容为空白
         };
         
-        this.init();
-    }
-
-    init() {
+        this.initElements();
         this.bindEvents();
         this.updateCharCount();
-        this.setupColorPickers();
+    }
+
+    initElements() {
+        // 获取所有DOM元素
+        this.elements = {
+            subtitleHeight: document.getElementById('subtitle-height'),
+            fontSize: document.getElementById('font-size'),
+            fontColor: document.getElementById('font-color'),
+            fontColorText: document.getElementById('font-color-text'),
+            outlineColor: document.getElementById('outline-color'),
+            outlineColorText: document.getElementById('outline-color-text'),
+            fontFamily: document.getElementById('font-family'),
+            fontWeight: document.getElementById('font-weight'),
+            subtitleText: document.getElementById('subtitle-text'),
+            charCount: document.getElementById('char-count'),
+            generateBtn: document.getElementById('generate-btn'),
+            saveBtn: document.getElementById('save-btn'),
+            uploadArea: document.getElementById('upload-area'),
+            imageInput: document.getElementById('image-input'),
+            previewCanvas: document.getElementById('preview-canvas'),
+            exportCanvas: document.getElementById('export-canvas')
+        };
+
+        // 设置默认文本
+        this.elements.subtitleText.value = '';  // 默认字幕内容为空白
+        this.settings.text = this.elements.subtitleText.value;
     }
 
     bindEvents() {
-        // 设置项变化监听 - 添加防抖处理
-        document.getElementById('subtitle-height').addEventListener('input', (e) => {
+        // 数值输入事件
+        this.elements.subtitleHeight.addEventListener('input', (e) => {
             this.settings.subtitleHeight = parseInt(e.target.value);
-            this.debouncedRender();
+            this.updatePreview();
         });
 
-        document.getElementById('font-size').addEventListener('input', (e) => {
+        this.elements.fontSize.addEventListener('input', (e) => {
             this.settings.fontSize = parseInt(e.target.value);
-            this.debouncedRender();
+            this.updatePreview();
         });
 
-        document.getElementById('font-color').addEventListener('change', (e) => {
+        // 颜色选择事件
+        this.elements.fontColor.addEventListener('input', (e) => {
             this.settings.fontColor = e.target.value;
-            document.getElementById('font-color-text').value = e.target.value;
-            document.getElementById('font-color-preview').style.backgroundColor = e.target.value;
-            this.debouncedRender();
+            this.elements.fontColorText.value = e.target.value;
+            this.updatePreview();
         });
 
-        document.getElementById('font-color-text').addEventListener('input', (e) => {
+        this.elements.fontColorText.addEventListener('input', (e) => {
             if (this.isValidHexColor(e.target.value)) {
                 this.settings.fontColor = e.target.value;
-                document.getElementById('font-color').value = e.target.value;
-                document.getElementById('font-color-preview').style.backgroundColor = e.target.value;
-                this.debouncedRender();
+                this.elements.fontColor.value = e.target.value;
+                this.updatePreview();
             }
         });
 
-        document.getElementById('outline-color').addEventListener('change', (e) => {
+        this.elements.outlineColor.addEventListener('input', (e) => {
             this.settings.outlineColor = e.target.value;
-            document.getElementById('outline-color-text').value = e.target.value;
-            document.getElementById('outline-color-preview').style.backgroundColor = e.target.value;
-            this.debouncedRender();
+            this.elements.outlineColorText.value = e.target.value;
+            this.updatePreview();
         });
 
-        document.getElementById('outline-color-text').addEventListener('input', (e) => {
+        this.elements.outlineColorText.addEventListener('input', (e) => {
             if (this.isValidHexColor(e.target.value)) {
                 this.settings.outlineColor = e.target.value;
-                document.getElementById('outline-color').value = e.target.value;
-                document.getElementById('outline-color-preview').style.backgroundColor = e.target.value;
-                this.debouncedRender();
+                this.elements.outlineColor.value = e.target.value;
+                this.updatePreview();
             }
         });
 
-        document.getElementById('font-family').addEventListener('change', (e) => {
+        // 字体设置事件
+        this.elements.fontFamily.addEventListener('change', (e) => {
             this.settings.fontFamily = e.target.value;
-            this.debouncedRender();
+            this.updatePreview();
         });
 
-        document.getElementById('font-weight').addEventListener('change', (e) => {
+        this.elements.fontWeight.addEventListener('change', (e) => {
             this.settings.fontWeight = e.target.value;
-            this.debouncedRender();
+            this.updatePreview();
         });
 
-        document.getElementById('subtitle-content').addEventListener('input', (e) => {
-            this.settings.content = e.target.value;
+        // 文本输入事件
+        this.elements.subtitleText.addEventListener('input', (e) => {
+            this.settings.text = e.target.value;
             this.updateCharCount();
-            this.debouncedRender();
+            this.updatePreview();
         });
 
-        // 文件上传相关
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
-
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        uploadArea.addEventListener('drop', this.handleDrop.bind(this));
-        fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-
-        // 颜色预览点击事件
-        document.getElementById('font-color-preview').addEventListener('click', () => {
-            document.getElementById('font-color').click();
+        // 文件上传事件
+        this.elements.uploadArea.addEventListener('click', () => {
+            this.elements.imageInput.click();
         });
 
-        document.getElementById('outline-color-preview').addEventListener('click', () => {
-            document.getElementById('outline-color').click();
+        this.elements.imageInput.addEventListener('change', (e) => {
+            this.handleImageUpload(e.target.files[0]);
+        });
+
+        // 拖拽上传事件
+        this.elements.uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.elements.uploadArea.classList.add('dragover');
+        });
+
+        this.elements.uploadArea.addEventListener('dragleave', () => {
+            this.elements.uploadArea.classList.remove('dragover');
+        });
+
+        this.elements.uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.elements.uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                this.handleImageUpload(file);
+            }
         });
 
         // 按钮事件
-        document.getElementById('generate-btn').addEventListener('click', this.generateSubtitleImage.bind(this));
-        document.getElementById('save-btn').addEventListener('click', this.saveImage.bind(this));
-    }
+        this.elements.generateBtn.addEventListener('click', () => {
+            this.generateImage();
+        });
 
-    setupColorPickers() {
-        // 设置初始颜色预览
-        document.getElementById('font-color-preview').style.backgroundColor = this.settings.fontColor;
-        document.getElementById('outline-color-preview').style.backgroundColor = this.settings.outlineColor;
-    }
-
-    // 防抖渲染函数
-    debouncedRender() {
-        if (this.renderTimeout) {
-            clearTimeout(this.renderTimeout);
-        }
-        this.renderTimeout = setTimeout(() => {
-            this.renderPreview();
-        }, 100); // 100ms 防抖延迟
+        this.elements.saveBtn.addEventListener('click', () => {
+            this.saveImage();
+        });
     }
 
     isValidHexColor(hex) {
-        return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+        return /^#[0-9A-F]{6}$/i.test(hex);
     }
 
     updateCharCount() {
-        const content = document.getElementById('subtitle-content').value;
-        const count = content.length;
-        document.getElementById('char-count').textContent = count;
+        const count = this.elements.subtitleText.value.length;
+        this.elements.charCount.textContent = count;
         
         if (count > 1000) {
-            document.getElementById('char-count').style.color = '#dc3545';
+            this.elements.charCount.style.color = '#dc3545';
         } else {
-            document.getElementById('char-count').style.color = '#6c757d';
+            this.elements.charCount.style.color = '#6c757d';
         }
     }
 
-    handleDragOver(e) {
-        e.preventDefault();
-        document.getElementById('upload-area').classList.add('dragover');
-    }
-
-    handleDragLeave(e) {
-        e.preventDefault();
-        document.getElementById('upload-area').classList.remove('dragover');
-    }
-
-    handleDrop(e) {
-        e.preventDefault();
-        document.getElementById('upload-area').classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            this.loadImage(files[0]);
-        }
-    }
-
-    handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (file) {
-            this.loadImage(file);
-        }
-    }
-
-    loadImage(file) {
-        // 验证文件类型
-        if (!file.type.startsWith('image/')) {
-            alert('请选择图片文件！');
+    handleImageUpload(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            alert('请选择有效的图片文件！');
             return;
         }
 
-        // 验证文件大小 (10MB)
         if (file.size > 10 * 1024 * 1024) {
-            alert('文件大小不能超过10MB！');
+            alert('图片文件大小不能超过10MB！');
             return;
         }
 
@@ -184,226 +170,142 @@ class SubtitleGenerator {
             const img = new Image();
             img.onload = () => {
                 this.backgroundImage = img;
-                this.setupCanvas();
-                this.createBackgroundCache(); // 创建背景缓存
-                this.renderPreview();
-                
-                // 显示预览区域，隐藏上传区域
-                document.getElementById('upload-area').style.display = 'none';
-                document.getElementById('preview-area').style.display = 'flex';
+                this.elements.uploadArea.style.display = 'none';
+                this.elements.previewCanvas.style.display = 'block';
+                this.updatePreview();
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    setupCanvas() {
+    updatePreview() {
         if (!this.backgroundImage) return;
 
+        const canvas = this.elements.previewCanvas;
+        const ctx = canvas.getContext('2d');
+        
+        // 设置画布尺寸
         const maxWidth = 800;
         const maxHeight = 600;
-        
         let { width, height } = this.backgroundImage;
         
-        // 等比例缩放
         if (width > maxWidth || height > maxHeight) {
             const ratio = Math.min(maxWidth / width, maxHeight / height);
             width *= ratio;
             height *= ratio;
         }
-
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.canvas.style.width = width + 'px';
-        this.canvas.style.height = height + 'px';
-    }
-
-    // 创建背景缓存
-    createBackgroundCache() {
-        if (!this.backgroundImage) return;
         
-        this.backgroundCanvas = document.createElement('canvas');
-        this.backgroundCanvas.width = this.canvas.width;
-        this.backgroundCanvas.height = this.canvas.height;
+        canvas.width = width;
+        canvas.height = height;
         
-        const bgCtx = this.backgroundCanvas.getContext('2d');
-        bgCtx.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    renderPreview() {
-        if (!this.backgroundImage || !this.backgroundCanvas) return;
-
-        const { width, height } = this.canvas;
-        
-        // 清空画布
-        this.ctx.clearRect(0, 0, width, height);
-        
-        // 使用缓存的背景
-        this.ctx.drawImage(this.backgroundCanvas, 0, 0);
+        // 绘制背景图片
+        ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         
         // 绘制字幕
-        this.drawSubtitles();
+        this.drawSubtitles(ctx, width, height);
     }
 
-    drawSubtitles() {
-        const content = this.settings.content.trim();
-        if (!content) return;
+    drawSubtitles(ctx, canvasWidth, canvasHeight) {
+        if (!this.settings.text.trim()) return;
 
-        const lines = content.split('\n').filter(line => line.trim());
+        const lines = this.settings.text.split('\n').filter(line => line.trim());
         if (lines.length === 0) return;
 
-        const { width, height } = this.canvas;
-        const subtitleHeight = this.settings.subtitleHeight;
-        const fontSize = this.settings.fontSize;
-        
         // 设置字体
-        this.ctx.font = `${this.settings.fontWeight} ${fontSize}px ${this.settings.fontFamily}`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
+        ctx.font = `${this.settings.fontWeight} ${this.settings.fontSize}px ${this.settings.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-        // 计算总字幕区域高度
-        const totalSubtitleHeight = lines.length * subtitleHeight;
-        
-        // 从底部开始绘制
-        const startY = height - totalSubtitleHeight;
-
-        // 创建一次性的背景条纹
-        this.createOptimizedBackgroundStrip(startY, totalSubtitleHeight);
+        // 计算字幕区域
+        const subtitleHeight = this.settings.subtitleHeight;
+        const totalHeight = lines.length * subtitleHeight;
+        const startY = canvasHeight - totalHeight;
 
         lines.forEach((line, index) => {
-            const y = startY + index * subtitleHeight;
+            const y = startY + (index * subtitleHeight);
+            
+            // 创建背景条 - 使用背景图片的底部切片作为背景
+            this.drawSubtitleBackground(ctx, canvasWidth, canvasHeight, y, subtitleHeight, index, lines.length);
             
             // 绘制文字描边
-            this.ctx.strokeStyle = this.settings.outlineColor;
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeText(line, width / 2, y + subtitleHeight / 2);
+            ctx.strokeStyle = this.settings.outlineColor;
+            ctx.lineWidth = 3;
+            ctx.strokeText(line, canvasWidth / 2, y + subtitleHeight / 2);
             
             // 绘制文字
-            this.ctx.fillStyle = this.settings.fontColor;
-            this.ctx.fillText(line, width / 2, y + subtitleHeight / 2);
+            ctx.fillStyle = this.settings.fontColor;
+            ctx.fillText(line, canvasWidth / 2, y + subtitleHeight / 2);
         });
     }
 
-    // 优化的背景条纹创建 - 一次性处理整个字幕区域
-    createOptimizedBackgroundStrip(startY, height) {
-        const ctx = this.ctx;
-        const canvasWidth = this.canvas.width;
+    drawSubtitleBackground(ctx, canvasWidth, canvasHeight, y, subtitleHeight, lineIndex, totalLines) {
+        // 保存当前状态
+        ctx.save();
         
-        // 获取整个字幕区域的图像数据
-        const imageData = ctx.getImageData(0, startY, canvasWidth, height);
-        const data = imageData.data;
+        // 计算缩放比例
+        const scaleX = this.backgroundImage.width / canvasWidth;
+        const scaleY = this.backgroundImage.height / canvasHeight;
         
-        // 批量处理像素，添加半透明效果
-        for (let i = 0; i < data.length; i += 4) {
-            // 降低亮度并增加透明度
-            data[i] = Math.floor(data[i] * 0.3);     // R
-            data[i + 1] = Math.floor(data[i + 1] * 0.3); // G
-            data[i + 2] = Math.floor(data[i + 2] * 0.3); // B
-            // Alpha 保持不变
-        }
+        // 创建临时画布来处理背景切片
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = canvasWidth;
+        tempCanvas.height = subtitleHeight;
         
-        // 一次性写回整个区域
-        ctx.putImageData(imageData, 0, startY);
+        // 从背景图片的底部切取图片条（固定从底部切取）
+        const bottomY = this.backgroundImage.height - (subtitleHeight * scaleY);
+        
+        // 从原始背景图片的底部切取条带
+        tempCtx.drawImage(
+            this.backgroundImage,
+            0, bottomY,  // 从背景图底部开始切取
+            this.backgroundImage.width, subtitleHeight * scaleY,  // 源图片的宽度和高度
+            0, 0,  // 目标位置
+            canvasWidth, subtitleHeight  // 目标尺寸
+        );
+        
+        // 在切取的图片条上叠加41%透明度的黑色遮罩
+        tempCtx.globalCompositeOperation = 'source-over';
+        tempCtx.fillStyle = 'rgba(0, 0, 0, 0.41)';
+        tempCtx.fillRect(0, 0, canvasWidth, subtitleHeight);
+        
+        // 将处理后的背景条绘制到主画布的字幕位置
+        ctx.drawImage(tempCanvas, 0, y);
+        
+        // 恢复状态
+        ctx.restore();
     }
 
-    async generateSubtitleImage() {
+    generateImage() {
         if (!this.backgroundImage) {
             alert('请先上传背景图片！');
             return;
         }
 
-        this.showLoading();
+        this.elements.generateBtn.disabled = true;
+        this.elements.generateBtn.innerHTML = '<span class="loading"></span> 生成中...';
 
-        try {
-            // 创建高分辨率画布
-            const outputCanvas = document.createElement('canvas');
-            const outputCtx = outputCanvas.getContext('2d');
+        setTimeout(() => {
+            const canvas = this.elements.exportCanvas;
+            const ctx = canvas.getContext('2d');
             
             // 使用原始图片尺寸
-            outputCanvas.width = this.backgroundImage.naturalWidth;
-            outputCanvas.height = this.backgroundImage.naturalHeight;
+            canvas.width = this.backgroundImage.width;
+            canvas.height = this.backgroundImage.height;
             
-            // 绘制原始尺寸的图片
-            outputCtx.drawImage(this.backgroundImage, 0, 0);
+            // 绘制背景图片
+            ctx.drawImage(this.backgroundImage, 0, 0);
             
-            // 计算缩放比例
-            const scaleX = this.backgroundImage.naturalWidth / this.canvas.width;
-            const scaleY = this.backgroundImage.naturalHeight / this.canvas.height;
+            // 绘制字幕
+            this.drawSubtitles(ctx, canvas.width, canvas.height);
             
-            // 绘制高分辨率字幕
-            this.drawHighResSubtitles(outputCtx, outputCanvas.width, outputCanvas.height, scaleX, scaleY);
+            this.elements.generateBtn.disabled = false;
+            this.elements.generateBtn.innerHTML = '生成字幕图片';
+            this.elements.saveBtn.disabled = false;
             
-            // 更新预览
-            this.canvas.width = outputCanvas.width;
-            this.canvas.height = outputCanvas.height;
-            this.ctx.drawImage(outputCanvas, 0, 0);
-            
-            // 重新调整显示尺寸
-            this.setupCanvas();
-            
-            setTimeout(() => {
-                this.hideLoading();
-                alert('字幕图片生成完成！');
-            }, 1000);
-            
-        } catch (error) {
-            console.error('生成图片时出错:', error);
-            this.hideLoading();
-            alert('生成图片时出错，请重试！');
-        }
-    }
-
-    drawHighResSubtitles(ctx, width, height, scaleX, scaleY) {
-        const content = this.settings.content.trim();
-        if (!content) return;
-
-        const lines = content.split('\n').filter(line => line.trim());
-        if (lines.length === 0) return;
-
-        const subtitleHeight = this.settings.subtitleHeight * scaleY;
-        const fontSize = this.settings.fontSize * scaleX;
-        
-        // 设置字体
-        ctx.font = `${this.settings.fontWeight} ${fontSize}px ${this.settings.fontFamily}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        // 计算总字幕区域高度
-        const totalSubtitleHeight = lines.length * subtitleHeight;
-        
-        // 从底部开始绘制
-        const startY = height - totalSubtitleHeight;
-
-        lines.forEach((line, index) => {
-            const y = startY + index * subtitleHeight;
-            
-            // 创建背景条效果
-            this.createHighResBackgroundStrip(ctx, y, subtitleHeight, height, width);
-            
-            // 绘制文字描边
-            ctx.strokeStyle = this.settings.outlineColor;
-            ctx.lineWidth = 3 * scaleX;
-            ctx.strokeText(line, width / 2, y + subtitleHeight / 2);
-            
-            // 绘制文字
-            ctx.fillStyle = this.settings.fontColor;
-            ctx.fillText(line, width / 2, y + subtitleHeight / 2);
-        });
-    }
-
-    createHighResBackgroundStrip(ctx, y, stripHeight, canvasHeight, canvasWidth) {
-        // 获取背景图片底部的像素数据
-        const sourceY = Math.max(0, canvasHeight - stripHeight);
-        const imageData = ctx.getImageData(0, sourceY, canvasWidth, stripHeight);
-        
-        // 创建半透明效果
-        const data = imageData.data;
-        for (let i = 3; i < data.length; i += 4) {
-            data[i] = data[i] * 0.7; // 70% 透明度
-        }
-        
-        // 绘制背景条
-        ctx.putImageData(imageData, 0, y);
+            this.showSuccessMessage('字幕图片生成成功！');
+        }, 1000);
     }
 
     saveImage() {
@@ -412,29 +314,26 @@ class SubtitleGenerator {
             return;
         }
 
-        try {
-            // 创建下载链接
-            const link = document.createElement('a');
-            link.download = `subtitle_${new Date().getTime()}.png`;
-            link.href = this.canvas.toDataURL('image/png');
-            
-            // 触发下载
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-        } catch (error) {
-            console.error('保存图片时出错:', error);
-            alert('保存图片时出错，请重试！');
-        }
+        const canvas = this.elements.exportCanvas;
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        
+        link.download = `subtitle-${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        this.showSuccessMessage('图片保存成功！');
     }
 
-    showLoading() {
-        document.getElementById('loading-overlay').style.display = 'flex';
-    }
-
-    hideLoading() {
-        document.getElementById('loading-overlay').style.display = 'none';
+    showSuccessMessage(message) {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'success-message';
+        messageEl.textContent = message;
+        document.body.appendChild(messageEl);
+        
+        setTimeout(() => {
+            messageEl.remove();
+        }, 3000);
     }
 }
 

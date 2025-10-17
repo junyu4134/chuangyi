@@ -27,14 +27,13 @@ body {
     background: #f8f9fa;
     border-right: 1px solid #e9ecef;
     overflow-y: auto;
-    max-height: 100vh;
 }
 
 .settings-panel h2 {
     font-size: 24px;
     font-weight: 600;
-    color: #2c3e50;
     margin-bottom: 30px;
+    color: #2c3e50;
     text-align: center;
 }
 
@@ -50,67 +49,53 @@ body {
     margin-bottom: 8px;
 }
 
-/* 输入框样式 */
 .input-group {
     display: flex;
     align-items: center;
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 8px;
-    padding: 0 12px;
+    overflow: hidden;
     transition: border-color 0.3s ease;
 }
 
 .input-group:focus-within {
     border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .input-group input[type="number"] {
-    border: none;
-    outline: none;
-    padding: 12px 0;
-    font-size: 16px;
     flex: 1;
-    background: transparent;
+    border: none;
+    padding: 12px 15px;
+    font-size: 14px;
+    outline: none;
 }
 
 .input-group .unit {
+    padding: 12px 15px;
+    background: #f8f9fa;
     color: #6c757d;
     font-size: 14px;
-    margin-left: 8px;
+    border-left: 1px solid #e9ecef;
 }
 
-/* 颜色输入组 */
 .color-input-group {
     display: flex;
-    align-items: center;
     gap: 10px;
 }
 
-.color-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+.color-input-group input[type="color"] {
+    width: 50px;
+    height: 44px;
     border: 2px solid #e9ecef;
+    border-radius: 8px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    background: none;
 }
 
-.color-preview:hover {
-    transform: scale(1.05);
-}
-
-input[type="color"] {
-    width: 0;
-    height: 0;
-    opacity: 0;
-    position: absolute;
-}
-
-input[type="text"] {
+.color-input-group input[type="text"] {
     flex: 1;
-    padding: 12px;
+    padding: 12px 15px;
     border: 2px solid #e9ecef;
     border-radius: 8px;
     font-size: 14px;
@@ -118,19 +103,17 @@ input[type="text"] {
     transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus {
+.color-input-group input[type="text"]:focus {
     outline: none;
     border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-/* 选择框样式 */
 select {
     width: 100%;
-    padding: 12px;
+    padding: 12px 15px;
     border: 2px solid #e9ecef;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     background: white;
     cursor: pointer;
     transition: border-color 0.3s ease;
@@ -139,17 +122,15 @@ select {
 select:focus {
     outline: none;
     border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-/* 文本域样式 */
 textarea {
     width: 100%;
     min-height: 120px;
-    padding: 12px;
+    padding: 15px;
     border: 2px solid #e9ecef;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     font-family: inherit;
     resize: vertical;
     transition: border-color 0.3s ease;
@@ -158,7 +139,6 @@ textarea {
 textarea:focus {
     outline: none;
     border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .char-count {
@@ -168,7 +148,6 @@ textarea:focus {
     margin-top: 5px;
 }
 
-/* 按钮样式 */
 .button-group {
     display: flex;
     flex-direction: column;
@@ -177,7 +156,7 @@ textarea:focus {
 }
 
 .btn {
-    padding: 15px 20px;
+    padding: 15px 25px;
     border: none;
     border-radius: 8px;
     font-size: 16px;
@@ -212,33 +191,29 @@ textarea:focus {
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
+    transform: none;
 }
 
 /* 右侧预览区域 */
 .preview-panel {
     flex: 1;
     padding: 30px;
-    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-container {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    max-width: 800px;
+    position: relative;
 }
 
-/* 上传区域 */
 .upload-area {
-    width: 100%;
-    height: 400px;
     border: 3px dashed #dee2e6;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 60px 30px;
+    text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
     background: #f8f9fa;
@@ -246,85 +221,42 @@ textarea:focus {
 
 .upload-area:hover {
     border-color: #007bff;
-    background: #e3f2fd;
+    background: #e7f3ff;
 }
 
 .upload-area.dragover {
     border-color: #007bff;
-    background: #e3f2fd;
+    background: #e7f3ff;
     transform: scale(1.02);
 }
 
 .upload-content {
-    text-align: center;
-    color: #6c757d;
+    pointer-events: none;
 }
 
 .upload-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    opacity: 0.6;
 }
 
-.upload-content p {
-    margin: 10px 0;
-    font-size: 16px;
+.upload-area p {
+    font-size: 18px;
+    color: #495057;
+    margin-bottom: 10px;
 }
 
 .upload-hint {
     font-size: 14px !important;
-    color: #adb5bd !important;
-}
-
-/* 预览区域 */
-.preview-area {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: #6c757d !important;
 }
 
 #preview-canvas {
     max-width: 100%;
-    max-height: 100%;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-/* 加载覆盖层 */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    color: white;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-overlay p {
-    font-size: 18px;
-    font-weight: 500;
+    max-height: 70vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: block;
+    margin: 0 auto;
 }
 
 /* 响应式设计 */
@@ -335,33 +267,51 @@ textarea:focus {
     
     .settings-panel {
         width: 100%;
-        max-height: none;
+        order: 2;
     }
     
     .preview-panel {
-        min-height: 400px;
-    }
-    
-    .button-group {
-        flex-direction: row;
+        order: 1;
+        min-height: 300px;
     }
 }
 
-/* 滚动条样式 */
-.settings-panel::-webkit-scrollbar {
-    width: 6px;
+/* 加载动画 */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
 }
 
-.settings-panel::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.settings-panel::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+/* 成功提示 */
+.success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
 }
 
-.settings-panel::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
